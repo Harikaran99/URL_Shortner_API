@@ -39,39 +39,44 @@ app.get('/api/hello', function(req, res) {
 
 
 // Express backend
-app.post('/api/shorturl', (req, res, next) => {
-  const httpRegex = new RegExp("http://|https://", "g")
-  const url = req.body.url
-  const httpCondition = httpRegex.test(url)
-// url sanity
-  const sanityUrl = url.replace(httpRegex, "")
-  //url filters and validating
-  const options = {
-    family: 6,
-    hints: dns.ADDRCONFIG | dns.V4MAPPED,
-  };
+  app.post('/api/shorturl', (req, res, next) => {
+    const httpRegex = new RegExp("http://|https://", "g")
+    const url = req.body.url
+    const httpCondition = httpRegex.test(url)
+  // url sanity
+    const sanityUrl = url.replace(httpRegex, "").split("/")[0]
+    //url filters and validating
+    const options = {
+      family: 6,
+      hints: dns.ADDRCONFIG | dns.V4MAPPED,
+    };
 
-  dns.lookup(sanityUrl, options,async (err, address, family) => {
-     if(!httpCondition || err) {
-      return res.json({error: "Invalid URL"})
-     }
-     //saving url to mongoose mongoose
-     //check url for already exits in database
-     const uid = new ShortUniqueId({ length: 7 });
-     const url_ID = uid.rnd()
-     const urlCount = await AllUrls.find({original_url: new RegExp(`^${url}`,"g")})
-     console.log(urlCount)
-     if(urlCount.length != 0) {
-      url_ID = `${urlCount[0].short_url}f${urlCount.length}`
-     } 
-     const newUrl = new AllUrls({original_url: url, short_url: url_ID})
-     newUrl.save()
-     res.json(newUrl)
-     next()
-  })
+    dns.lookup(sanityUrl, options,async (err, address, family) => {
+      if(!httpCondition || err) {
+        return res.json({error: "Invalid URL"})
+      }
+      //saving url to mongoose mongoose
+      //check url for already exits in database
+      const uid = new ShortUniqueId({ length: 7 });
+      const fingRegExp = new RegExp(`${url.split("/")[2]}`)
+      let url_ID = uid.rnd()
+      const urlCount = await AllUrls.find({original_url: fingRegExp})
+      if(urlCount.length != 0) {
+        url_ID = `${urlCount[0].short_url}f${urlCount.length}`
+      } 
+      const newUrl = new AllUrls({original_url: url, short_url: url_ID})
+      newUrl.save()
+      let {_id, ...urlRes} = newUrl._doc
+      res.json(urlRes)
+      next()
+    })
+})
 
-
-
+app.get("/api/shorturl/:url",async (req, res, next) => {
+  const shortURL = req.params.url
+  const link = await AllUrls.find({short_url: shortURL})
+  link.length === 0 ? res.json({error: "Wrong format"}) : res.status(301).redirect(link[0].original_url)
+  next()
 })
 
 app.listen(port, function() {
