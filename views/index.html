@@ -13,20 +13,33 @@
 
   <body>
     <h1>URL Shortener Microservice</h1>
+    <h2>Short URL Creation</h4>
+    <p>give a website link to the input box below here to make your link smaller...</p>
+    <p>Example : <code>POST [project_url]/api/shorturl</code> - <code> https://www.rrbchennai.gov.in/</code></p>
     <main>
+      <fieldset 
+      id="wrapper">
       <section>
         <form action="api/shorturl" method="POST">
           <fieldset>
             <legend>URL Shortener</legend>
             <label for="url_input">URL:</label>
             <input id="url_input" type="text" name="url" placeholder="https://www.freecodecamp.org/" />
-            <input type="submit" value="POST URL" />
+            <input type="submit" value="POST URL" id="button" />
           </fieldset>
         </form>
       </section>
-    </main>
+    </fieldset>
+  </main>
+  <h2>Using The Short URL</h2>
+  <p>it will give json object as a response that contain original URL and short URL </p>
+  <p>You can access the original link using the short url string</p>
+  <p>like --><code>[project_url]/api/shorturl[your short_url string]</code></p>
+  <a href="/api/shorturl/2LOuStK" id="ex_link">Example :<code>[this_project_url]/api/shorturl/2LOuStK</code></a>
+  <h2>Will Redirect to</h2>
+  <p>https://www.rrbchennai.gov.in/</p>
     <footer>
-      <p>By <a href="https://www.freecodecamp.org/">freeCodeCamp</a></p>
+      <p>By <a href="https://www.freecodecamp.org/" id="footer">Hariharan</a></p>
     </footer>
   </body>
 </html>
